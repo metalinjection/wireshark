@@ -234,7 +234,7 @@ static const value_string activation_codes[] = {
     { 0x04, "Routing activation denied due to missing authentication." },
     { 0x05, "Routing activation denied due to rejected confirmation." },
     { 0x06, "Routing activation denied due to unsupported routing activation type." },
-    { 0x07, "Reserved by ISO 13400." },
+    { 0x07, "Routing activation denied due to encryption request." },
     { 0x08, "Reserved by ISO 13400." },
     { 0x09, "Reserved by ISO 13400." },
     { 0x0A, "Reserved by ISO 13400." },
@@ -465,7 +465,7 @@ add_routing_activation_request_fields(proto_tree *doip_tree, tvbuff_t *tvb, guin
         if ( tvb_bytes_exist(tvb, DOIP_ROUTING_ACTIVATION_REQ_OEM_OFFSET_V1, DOIP_ROUTING_ACTIVATION_REQ_OEM_LEN) ) {
             proto_tree_add_item(doip_tree, hf_reserved_oem, tvb, DOIP_ROUTING_ACTIVATION_REQ_OEM_OFFSET_V1, DOIP_ROUTING_ACTIVATION_REQ_OEM_LEN, ENC_BIG_ENDIAN);
         }
-    } else if (version == ISO13400_2012) {
+    } else if ((version == ISO13400_2012) || (version == ISO13400_2019)) {
         proto_tree_add_item(doip_tree, hf_activation_type_v2, tvb, DOIP_ROUTING_ACTIVATION_REQ_TYPE_OFFSET, DOIP_ROUTING_ACTIVATION_REQ_TYPE_LEN_V2, ENC_NA);
         proto_tree_add_item(doip_tree, hf_reserved_iso, tvb, DOIP_ROUTING_ACTIVATION_REQ_ISO_OFFSET_V2, DOIP_ROUTING_ACTIVATION_REQ_ISO_LEN, ENC_BIG_ENDIAN);
 
@@ -586,6 +586,7 @@ dissect_doip_message(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
     if (
         version == ISO13400_2010 ||
         version == ISO13400_2012 ||
+        version == ISO13400_2019 ||
         (version == DEFAULT_VALUE && (payload_type >= DOIP_VEHICLE_IDENTIFICATION_REQ && payload_type <= DOIP_VEHICLE_IDENTIFICATION_REQ_EID))
         ) {
         col_add_fstr(pinfo->cinfo, COL_INFO, "%s", val_to_str(payload_type, doip_payloads, "0x%04x Unknown payload"));
